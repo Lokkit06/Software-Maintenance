@@ -241,6 +241,7 @@ h5.over-title {
     -o-transition: -o-transform 300ms ease 0s;
     -webkit-transition: -webkit-transform 300ms ease;
     -webkit-transition-delay: 0s;
+    transition-delay: 0s;
     transition: transform 300ms ease 0s;
     height: 100%;
     width: 100%;
@@ -257,6 +258,7 @@ h5.over-title {
     -o-transition: -o-transform 300ms ease 0s;
     -webkit-transition: -webkit-transform 300ms ease;
     -webkit-transition-delay: 0s;
+    transition-delay: 0s;
     transition: transform 300ms ease 0s;
   }
   #app.app-slide-off > #off-sidebar {
@@ -266,6 +268,7 @@ h5.over-title {
     -o-transition: -o-transform 300ms ease 0s;
     -webkit-transition: -webkit-transform 300ms ease;
     -webkit-transition-delay: 0s;
+    transition-delay: 0s;
     transition: transform 300ms ease 0s;
   }
   #app.app-offsidebar-open > .app-content {
@@ -279,6 +282,7 @@ h5.over-title {
     -o-transition: -o-transform 300ms ease 0s;
     -webkit-transition: -webkit-transform 300ms ease;
     -webkit-transition-delay: 0s;
+    transition-delay: 0s;
     transition: transform 300ms ease 0s;
   }
 }
@@ -457,11 +461,13 @@ h5.over-title {
     top: 0;
     left: 0;
     right: 0;
+    transform: translateZ(0);
     -webkit-transform: translateZ(0);
   }
   .app-navbar-fixed .navbar .dropdown-off-sidebar {
     position: fixed;
     top: 0;
+    transform: translateZ(0);
     -webkit-transform: translateZ(0);
   }
 }
@@ -490,6 +496,7 @@ h5.over-title {
     position: fixed;
     right: 0;
     width: 100%;
+    transform: translateZ(0);
     -webkit-transform: translateZ(0);
   }
 }
@@ -520,6 +527,7 @@ h5.over-title {
   -o-transition: -o-transform 0.2s ease 0s;
   -webkit-transition: -webkit-transform 0.2s ease;
   -webkit-transition-delay: 0s;
+  transition-delay: 0s;
   transition: transform 0.2s ease 0s;
   width: 24px;
   margin-left: -12px;
@@ -944,6 +952,7 @@ h5.over-title {
     -o-transition: -o-transform 300ms ease 0s;
     -webkit-transition: -webkit-transform 300ms ease;
     -webkit-transition-delay: 0s;
+    transition-delay: 0s;
     transition: transform 300ms ease 0s;
   }
   #sidebar > div {
@@ -956,6 +965,7 @@ h5.over-title {
     -o-transition: -o-transform 300ms ease 0s;
     -webkit-transition: -webkit-transform 300ms ease;
     -webkit-transition-delay: 0s;
+    transition-delay: 0s;
     transition: transform 300ms ease 0s;
   }
   #sidebar nav {
@@ -1191,6 +1201,7 @@ ul.sub-menu li ul.sub-menu li ul.sub-menu li a {
 @media (min-width: 992px) {
   .app-aside div {
     -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
 
   .app-sidebar-closed .app-aside {
@@ -1241,6 +1252,7 @@ ul.sub-menu li ul.sub-menu li ul.sub-menu li a {
     margin-left: 0;
     z-index: 1051;
     -webkit-transform: translateZ(0);
+    transform: translateZ(0);
   }
   .app-sidebar-closed .app-aside > .item-inner.active {
     background: #c8c7cc !important;
@@ -1586,6 +1598,7 @@ ul.sub-menu li ul.sub-menu li ul.sub-menu li a {
   -o-transition: right 0.2s ease 0s;
   -webkit-transition: right 0.2s ease;
   -webkit-transition-delay: 0s;
+  transition-delay: 0s;
   transition: right 0.2s ease 0s;
   border-left: 1px solid #c8c7cc !important;
   border-bottom: 1px solid #c8c7cc !important;
@@ -1828,11 +1841,12 @@ ul.sub-menu li ul.sub-menu li ul.sub-menu li a {
   position: fixed;
   right: -260px;
   top: 64px;
-  -moz-transition: all 0.3s !important 0s;
-  -o-transition: all 0.3s !important 0s;
-  -webkit-transition: all 0.3s !important;
+  -moz-transition: all 0.3s ease 0s !important;
+  -o-transition: all 0.3s ease 0s !important;
+  -webkit-transition: all 0.3s ease 0s !important;
   -webkit-transition-delay: 0s;
-  transition: all 0.3s !important 0s;
+  transition-delay: 0s;
+  transition: all 0.3s ease 0s !important;
   width: 260px;
   z-index: 1091;
   background: #ffffff;
@@ -1859,6 +1873,7 @@ ul.sub-menu li ul.sub-menu li ul.sub-menu li a {
     -o-transition: -o-transform 300ms ease 0s;
     -webkit-transition: -webkit-transform 300ms ease;
     -webkit-transition-delay: 0s;
+    transition-delay: 0s;
     transition: transform 300ms ease 0s;
   }
 }
@@ -1886,6 +1901,7 @@ ul.sub-menu li ul.sub-menu li ul.sub-menu li a {
     -o-transition: -o-transform 300ms ease 0s;
     -webkit-transition: -webkit-transform 300ms ease;
     -webkit-transition-delay: 0s;
+    transition-delay: 0s;
     transition: transform 300ms ease 0s;
   }
 }
@@ -1935,6 +1951,7 @@ ul.sub-menu li ul.sub-menu li ul.sub-menu li a {
   -o-transition: right 0.3s ease 0s;
   -webkit-transition: right 0.3s ease;
   -webkit-transition-delay: 0s;
+  transition-delay: 0s;
   transition: right 0.3s ease 0s;
 }
 .app-slide-off #off-sidebar #users {
@@ -4403,7 +4420,7 @@ a.text-light:hover {
   animation: heart-pulse 1s linear infinite;
 }
 
-@keyframes "heart-pulse" {
+@keyframes heart-pulse {
   0% {
     color: #a51919;
   }
@@ -4425,7 +4442,7 @@ a.text-light:hover {
     color: red;
   }
 }
-@-webkit-keyframes "heart-pulse" {
+@-webkit-keyframes heart-pulse {
   0% {
     color: #a51919;
   }
@@ -4436,7 +4453,7 @@ a.text-light:hover {
     color: red;
   }
 }
-@-ms-keyframes "heart-pulse" {
+@-ms-keyframes heart-pulse {
   0% {
     color: #a51919;
   }
@@ -5031,7 +5048,6 @@ div.cs-select:focus {
 
 .cs-select > span::after,
 .cs-select .cs-selected span::after {
-  speak: none;
   position: absolute;
   top: 50%;
   -webkit-transform: translateY(-50%);
@@ -8160,6 +8176,7 @@ Social Icons
   -o-transition: all 0.3s ease 0s;
   -webkit-transition: all 0.3s ease;
   -webkit-transition-delay: 0s;
+  transition-delay: 0s;
   transition: all 0.3s ease 0s;
   font-size: 14px;
 }
@@ -8677,6 +8694,7 @@ nav.links a {
   -webkit-transition: -webkit-transform 0.3s;
   -moz-transition: -moz-transform 0.3s;
   transition: transform 0.3s;
+  transform: translateX(-25%);
   -webkit-transform: translateX(-25%);
 }
 

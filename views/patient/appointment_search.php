@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <?php
 require_once '../../config/db_connect.php';
+require_once '../../includes/appointments.php';
 ?>
 <html>
 <head>
@@ -13,11 +14,10 @@ require_once '../../config/db_connect.php';
 <?php
 if(isset($_POST['app_search_submit']))
 {
-	$contact=$_POST['app_contact'];
-	$query = "select * from appointmenttb where contact= '$contact';";
-  $result = mysqli_query($con,$query);
-  $row=mysqli_fetch_array($result);
-  if($row['fname']=="" & $row['lname']=="" & $row['email']=="" & $row['contact']=="" & $row['doctor']=="" & $row['docFees']=="" & $row['appdate']=="" & $row['apptime']==""){
+	$contact=$_POST['app_contact'] ?? '';
+	$rows = fetch_appointments_by_contact($con, $contact);
+
+  if(empty($rows)){
     echo "<script> alert('No entries found! Please enter valid details'); 
           window.location.href = '../admin/dashboard.php#list-doc';</script>";
   }
@@ -41,7 +41,7 @@ if(isset($_POST['app_search_submit']))
     </thead>
     <tbody>";
   
-    
+    foreach ($rows as $row) {
           $fname = $row['fname'];
           $lname = $row['lname'];
           $email = $row['email'];
@@ -74,6 +74,7 @@ if(isset($_POST['app_search_submit']))
             <td>$apptime</td>
             <td>$appstatus</td>
           </tr>";
+    }
     echo "</tbody></table><center><a href='../admin/dashboard.php' class='btn btn-light'>Back to your Dashboard</a></div></center></div></div></div>";
   }
   }

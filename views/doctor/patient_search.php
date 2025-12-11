@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <?php
 require_once '../../config/db_connect.php';
+require_once '../../includes/patients.php';
 ?>
 <html>
 <head>
@@ -11,11 +12,10 @@ require_once '../../config/db_connect.php';
 <?php
 if(isset($_POST['patient_search_submit']))
 {
-	$contact=$_POST['patient_contact'];
-	$query = "select * from patreg where contact= '$contact'";
-  $result = mysqli_query($con,$query);
-  $row=mysqli_fetch_array($result);
-  if($row['lname']=="" & $row['email']=="" & $row['contact']=="" & $row['password']==""){
+	$contact=$_POST['patient_contact'] ?? '';
+  $row = fetch_patient_by_contact($con, $contact);
+
+  if(!$row){
     echo "<script> alert('No entries found! Please enter valid details'); 
           window.location.href = '../admin/dashboard.php#list-doc';</script>";
   }
@@ -30,7 +30,6 @@ if(isset($_POST['patient_search_submit']))
       <th scope='col'>Last Name</th>
       <th scope='col'>Email</th>
       <th scope='col'>Contact</th>
-      <th scope='col'>Password</th>
     </tr>
   </thead>
   <tbody>";
@@ -40,13 +39,11 @@ if(isset($_POST['patient_search_submit']))
         $lname = $row['lname'];
         $email = $row['email'];
         $contact = $row['contact'];
-        $password = $row['password'];
         echo "<tr>
           <td>$fname</td>
           <td>$lname</td>
           <td>$email</td>
           <td>$contact</td>
-          <td>$password</td>
         </tr>";
     
 	echo "</tbody></table><center><a href='../admin/dashboard.php' class='btn btn-light'>Back to dashboard</a></div></center></div></div></div>";

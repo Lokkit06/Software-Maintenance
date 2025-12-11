@@ -32,7 +32,7 @@ $prescriptions = $pid ? fetch_prescriptions_by_patient($con, (int)$pid) : [];
                   <td><?php echo $row['allergy']; ?></td>
                   <td><?php echo $row['prescription']; ?></td>
                   <td>
-                        <a href="dashboard.php?ID=<?php echo $row['ID']?>"
+                        <a href="dashboard.php?ID=<?php echo $row['ID']?>&generate_bill=1"
                            onclick="alert('Bill Paid Successfully');"
                            class="btn btn-success">Pay Bill</a>
                   </td>

@@ -36,8 +36,8 @@ function fetch_doctor_specs(mysqli $con): array {
     $result = $stmt->get_result();
     $rows = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     $stmt->close();
-    // Flatten to string array
-    return array_values(array_map(fn($r) => $r['spec'], $rows));
+    // Flatten to string array (compat: no arrow functions)
+    return array_values(array_map(function ($r) { return $r['spec']; }, $rows));
 }
 
 /**

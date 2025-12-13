@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <?php
 include('../../actions/doctor_login.php');
+require_once __DIR__ . '/../../config/logger.php';
+
+app_log_request('prescribe_page_hit');
+
 $pid='';
 $ID='';
 $appdate='';
 $apptime='';
 $fname = '';
 $lname= '';
-$doctor = $_SESSION['dname'];
+$doctor = $_SESSION['dname'] ?? '';
 if(isset($_GET['pid']) && isset($_GET['ID']) && ($_GET['appdate']) && isset($_GET['apptime']) && isset($_GET['fname']) && isset($_GET['lname'])) {
 $pid = $_GET['pid'];
   $ID = $_GET['ID'];
@@ -20,34 +24,71 @@ $pid = $_GET['pid'];
 
 
 if(isset($_POST['prescribe']) && isset($_POST['pid']) && isset($_POST['ID']) && isset($_POST['appdate']) && isset($_POST['apptime']) && isset($_POST['lname']) && isset($_POST['fname'])){
+  // Log page hit only when form is submitted (POST request)
+  app_log_request('prescribe_form_submitted');
+  
   $appdate = $_POST['appdate'];
   $apptime = $_POST['apptime'];
-  $disease = $_POST['disease'];
-  $allergy = $_POST['allergy'];
+  $disease = $_POST['disease'] ?? '';
+  $allergy = $_POST['allergy'] ?? '';
   $fname = $_POST['fname'];
   $lname = $_POST['lname'];
   $pid = $_POST['pid'];
   $ID = $_POST['ID'];
-  $prescription = $_POST['prescription'];
+  $prescription = $_POST['prescription'] ?? '';
+  
+  // Log that doctor clicked prescribe button and is attempting to create prescription
+  app_log('Doctor clicked prescribe button', [
+    'action' => 'prescribe_attempt',
+    'user_type' => 'doctor',
+    'doctor' => $doctor,
+    'patient_id' => $pid,
+    'appointment_id' => $ID,
+    'patient_name' => $fname . ' ' . $lname,
+    'appdate' => $appdate,
+    'apptime' => $apptime,
+    'disease' => $disease,
+  ]);
   
   try {
     $query=mysqli_query($con,"insert into prestb(doctor,pid,ID,fname,lname,appdate,apptime,disease,allergy,prescription) values ('$doctor','$pid','$ID','$fname','$lname','$appdate','$apptime','$disease','$allergy','$prescription')");
       if($query)
       {
+        // Log successful prescription creation
+        app_log('Prescription created successfully', [
+          'action' => 'prescription_created',
+          'user_type' => 'doctor',
+          'doctor' => $doctor,
+          'patient_id' => $pid,
+          'appointment_id' => $ID,
+          'patient_name' => $fname . ' ' . $lname,
+          'appdate' => $appdate,
+          'apptime' => $apptime,
+          'disease' => $disease,
+          'allergy' => $allergy,
+        ]);
+        
         echo "<script>alert('Prescribed successfully!');</script>";
       }
       else{
         throw new Exception('Failed to save prescription');
       }
   } catch (Throwable $e) {
+    // Log prescription creation failure
+    app_log('Prescription creation failed', [
+      'action' => 'prescription_failed',
+      'user_type' => 'doctor',
+      'doctor' => $doctor,
+      'patient_id' => $pid,
+      'appointment_id' => $ID,
+      'patient_name' => $fname . ' ' . $lname,
+      'error' => $e->getMessage(),
+    ]);
+    
     error_log('prescribe failed: ' . $e->getMessage());
     echo "<script>alert('An unexpected error occurred. Please try again.');</script>";
     exit;
   }
-  // else{
-  //   echo "<script>alert('GET is not working!');</script>";
-  // }initial
-  // enga error?
 }
 
 ?>

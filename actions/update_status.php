@@ -1,6 +1,8 @@
 <?php
 // session_start();
 require_once __DIR__ . '/../config/db_connect.php';
+require_once __DIR__ . '/../config/logger.php';
+
 // if(isset($_POST['submit'])){
 //  $username=$_POST['username'];
 //  $password=$_POST['password'];
@@ -23,12 +25,13 @@ if(isset($_POST['update_data']))
     $query="update appointmenttb set payment='$status' where contact='$contact';";
     $result=mysqli_query($con,$query);
     if($result) {
+      app_log('payment_status_updated', ['contact' => $contact, 'status' => $status]);
       header("Location:updated.php");
       exit;
     }
     throw new Exception('Failed to update payment status');
   } catch (Throwable $e) {
-    error_log('update_status update_data failed: ' . $e->getMessage());
+    app_log('update_status_failed', ['error' => $e->getMessage(), 'contact' => $contact ?? null]);
     echo "<script>alert('An unexpected error occurred. Please try again.');
           window.location.href = '../views/public/error_login.php';</script>";
     exit;
@@ -94,12 +97,13 @@ if(isset($_POST['doc_sub']))
     $query="insert into doctb(username)values('$username')";
     $result=mysqli_query($con,$query);
     if($result) {
+      app_log('doctor_added_from_update_status', ['username' => $username]);
       header("Location:adddoc.php");
       exit;
     }
     throw new Exception('Failed to add doctor');
   } catch (Throwable $e) {
-    error_log('update_status doc_sub failed: ' . $e->getMessage());
+    app_log('update_status_doc_add_failed', ['error' => $e->getMessage(), 'username' => $username ?? null]);
     echo "<script>alert('An unexpected error occurred. Please try again.');
           window.location.href = '../views/public/error_login.php';</script>";
     exit;

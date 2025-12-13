@@ -25,8 +25,6 @@ include('header.php');
           <?php include('delete_doctor.php'); ?>
           
           <div class="tab-pane fade" id="list-attend" role="tabpanel" aria-labelledby="list-attend-list">...</div>
-          
-          <?php include('query_list.php'); ?>
 
         </div>
       </div>

@@ -1,5 +1,8 @@
 <?php
 require_once __DIR__ . '/../config/db_connect.php';
+require_once __DIR__ . '/../config/logger.php';
+
+app_log_request('process_contact_hit');
 if(isset($_POST['btnSubmit']))
 {
 	$name = $_POST['txtName'];
@@ -13,6 +16,7 @@ if(isset($_POST['btnSubmit']))
         
         if($result)
         {
+            app_log('contact_message_saved', ['name' => $name, 'email' => $email, 'contact' => $contact]);
             echo '<script type="text/javascript">'; 
             echo 'alert("Message sent successfully!");'; 
             echo 'window.location.href = "../views/public/contact.php";';
@@ -22,7 +26,7 @@ if(isset($_POST['btnSubmit']))
 
         throw new Exception('Failed to save contact message');
     } catch (Throwable $e) {
-        error_log('process_contact failed: ' . $e->getMessage());
+        app_log('process_contact_failed', ['error' => $e->getMessage(), 'email' => $email ?? null, 'contact' => $contact ?? null]);
         echo '<script type="text/javascript">'; 
         echo 'alert("An unexpected error occurred. Please try again.");'; 
         echo 'window.location.href = "../views/public/contact.php";';

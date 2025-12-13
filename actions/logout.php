@@ -1,6 +1,17 @@
 <?php
-session_start();
-session_destroy();
+require_once __DIR__ . '/../config/logger.php';
+
+app_log_request('logout_hit');
+try {
+    session_start();
+    $user = $_SESSION['username'] ?? null;
+    session_destroy();
+    app_log('patient_logout', ['username' => $user]);
+} catch (Throwable $e) {
+    app_log('patient_logout_failed', ['error' => $e->getMessage()]);
+    echo "<script>alert('An unexpected error occurred. Please try again.'); window.location.href = '../views/public/login.php';</script>";
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

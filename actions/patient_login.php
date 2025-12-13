@@ -8,6 +8,7 @@
 
 session_start();
 require_once __DIR__ . '/../config/db_connect.php';
+require_once __DIR__ . '/../config/logger.php';
 
 /**
  * Authenticate a patient by email/password.
@@ -29,7 +30,12 @@ function authenticate_patient(mysqli $con, string $email, string $password): ?ar
 
         return $patient ?: null;
     } catch (Throwable $e) {
-        error_log('patient_login authenticate_patient failed: ' . $e->getMessage());
+        app_log('Patient authentication error', [
+            'action' => 'authenticate_error',
+            'user_type' => 'patient',
+            'email' => $email,
+            'error' => $e->getMessage()
+        ]);
         return null;
     }
 }
@@ -57,15 +63,35 @@ if (isset($_POST['patsub'])) {
 
         if ($patient) {
             start_patient_session($patient);
+            $patientId = $patient['pid'] ?? null;
+            $patientName = ($patient['fname'] ?? '') . ' ' . ($patient['lname'] ?? '');
+            app_log("Patient logged in successfully (ID: {$patientId}, Email: {$email})", [
+                'action' => 'login_success',
+                'user_type' => 'patient',
+                'email' => $email,
+                'patient_id' => $patientId,
+                'name' => $patientName
+            ]);
             header('Location: ../views/patient/dashboard.php');
             exit;
         }
 
         echo "<script>alert('Invalid Username or Password. Try Again!');
               window.location.href = '../views/public/login.php';</script>";
+        app_log('Patient login failed - wrong password', [
+            'action' => 'login_failed',
+            'user_type' => 'patient',
+            'email' => $email,
+            'reason' => 'invalid_credentials'
+        ]);
         exit;
     } catch (Throwable $e) {
-        error_log('patient_login failed: ' . $e->getMessage());
+        app_log('Patient login error - system failure', [
+            'action' => 'login_error',
+            'user_type' => 'patient',
+            'email' => $email,
+            'error' => $e->getMessage()
+        ]);
         echo "<script>alert('An unexpected error occurred. Please try again.');
               window.location.href = '../views/public/login.php';</script>";
         exit;

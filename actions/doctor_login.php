@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../config/db_connect.php';
+require_once __DIR__ . '/../config/logger.php';
 
 /**
  * Authenticate a doctor by username/password.
@@ -21,7 +22,12 @@ function authenticate_doctor(mysqli $con, string $username, string $password): ?
         $stmt->close();
         return $row ?: null;
     } catch (Throwable $e) {
-        error_log('doctor_login authenticate_doctor failed: ' . $e->getMessage());
+        app_log('Doctor authentication error', [
+            'action' => 'authenticate_error',
+            'user_type' => 'doctor',
+            'username' => $username,
+            'error' => $e->getMessage()
+        ]);
         return null;
     }
 }
@@ -34,15 +40,31 @@ if (isset($_POST['docsub1'])) {
         $doctor = authenticate_doctor($con, $dname, $dpass);
         if ($doctor) {
             $_SESSION['dname'] = $doctor['username'];
+            app_log('Doctor logged in successfully', [
+                'action' => 'login_success',
+                'user_type' => 'doctor',
+                'username' => $doctor['username']
+            ]);
             header("Location: ../views/doctor/dashboard.php");
             exit;
         }
 
         echo "<script>alert('Invalid Username or Password. Try Again!');
               window.location.href = '../views/public/index.php';</script>";
+        app_log('Doctor login failed - wrong password', [
+            'action' => 'login_failed',
+            'user_type' => 'doctor',
+            'username' => $dname,
+            'reason' => 'invalid_credentials'
+        ]);
         exit;
     } catch (Throwable $e) {
-        error_log('doctor_login failed: ' . $e->getMessage());
+        app_log('Doctor login error - system failure', [
+            'action' => 'login_error',
+            'user_type' => 'doctor',
+            'username' => $dname,
+            'error' => $e->getMessage()
+        ]);
         echo "<script>alert('An unexpected error occurred. Please try again.');
               window.location.href = '../views/public/index.php';</script>";
         exit;
@@ -63,16 +85,18 @@ if (isset($_POST['docsub1'])) {
 
 
 
-function display_docs()
-{
-	global $con;
-	$query="select * from doctb";
-	$result=mysqli_query($con,$query);
-	while($row=mysqli_fetch_array($result))
+if (!function_exists('display_docs')) {
+	function display_docs()
 	{
-		$name=$row['name'];
-		# echo'<option value="" disabled selected>Select Doctor</option>';
-		echo '<option value="'.$name.'">'.$name.'</option>';
+		global $con;
+		$query="select * from doctb";
+		$result=mysqli_query($con,$query);
+		while($row=mysqli_fetch_array($result))
+		{
+			$name=$row['name'];
+			# echo'<option value="" disabled selected>Select Doctor</option>';
+			echo '<option value="'.$name.'">'.$name.'</option>';
+		}
 	}
 }
 

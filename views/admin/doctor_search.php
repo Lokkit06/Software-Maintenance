@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <?php
 require_once '../../config/db_connect.php';
+require_once '../../config/logger.php';
 ?>
 <html>
 <head>
@@ -21,10 +22,12 @@ if(isset($_POST['doctor_search_submit']))
       }
       $row=mysqli_fetch_array($result);
       if(!$row || ($row['username']=="" && $row['password']=="" && $row['email']=="" && $row['docFees']=="")){
+        app_log('doctor_search_no_entries', ['email' => $contact]);
         echo "<script> alert('No entries found!'); 
               window.location.href = 'dashboard.php#list-doc';</script>";
       }
       else {
+        app_log('doctor_search_found', ['email' => $contact]);
         echo "<div class='container-fluid' style='margin-top:50px;'>
     	<div class ='card'>
     	<div class='card-body' style='background-color:#342ac1;color:#ffffff;'>

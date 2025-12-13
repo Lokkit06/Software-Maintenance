@@ -2,6 +2,7 @@
 <?php
 require_once '../../config/db_connect.php';
 require_once '../../includes/appointments.php';
+require_once '../../config/logger.php';
 ?>
 <html>
 <head>
@@ -19,10 +20,12 @@ if(isset($_POST['app_search_submit']))
     	$rows = fetch_appointments_by_contact($con, $contact);
 
       if(empty($rows)){
+        app_log('appointment_search_no_entries', ['contact' => $contact]);
         echo "<script> alert('No entries found! Please enter valid details'); 
               window.location.href = '../admin/dashboard.php#list-doc';</script>";
       }
       else {
+        app_log('appointment_search_found', ['contact' => $contact, 'count' => count($rows)]);
         echo "<div class='container-fluid' style='margin-top:50px;'>
         <div class='card'>
         <div class='card-body' style='background-color:#342ac1;color:#ffffff;'>

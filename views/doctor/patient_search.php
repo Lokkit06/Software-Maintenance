@@ -2,6 +2,7 @@
 <?php
 require_once '../../config/db_connect.php';
 require_once '../../includes/patients.php';
+require_once '../../config/logger.php';
 ?>
 <html>
 <head>
@@ -17,10 +18,12 @@ if(isset($_POST['patient_search_submit']))
       $row = fetch_patient_by_contact($con, $contact);
 
       if(!$row){
+        app_log('doctor_patient_search_no_entries', ['contact' => $contact]);
         echo "<script> alert('No entries found! Please enter valid details'); 
               window.location.href = '../admin/dashboard.php#list-doc';</script>";
       }
       else {
+        app_log('doctor_patient_search_found', ['contact' => $contact]);
         echo "<div class='container-fluid' style='margin-top:50px;'>
     	<div class='card'>
     	<div class='card-body' style='background-color:#342ac1;color:#ffffff;'>

@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../config/db_connect.php';
+require_once __DIR__ . '/../config/logger.php';
 
 /**
  * Authenticate an admin by username/password.
@@ -21,7 +22,12 @@ function authenticate_admin(mysqli $con, string $username, string $password): ?a
         $stmt->close();
         return $row ?: null;
     } catch (Throwable $e) {
-        error_log('admin_login authenticate_admin failed: ' . $e->getMessage());
+        app_log('Admin authentication error', [
+            'action' => 'authenticate_error',
+            'user_type' => 'admin',
+            'username' => $username,
+            'error' => $e->getMessage()
+        ]);
         return null;
     }
 }
@@ -34,15 +40,31 @@ if (isset($_POST['adsub'])) {
         $admin = authenticate_admin($con, $username, $password);
         if ($admin) {
             $_SESSION['username'] = $admin['username'];
+            app_log('Admin logged in successfully', [
+                'action' => 'login_success',
+                'user_type' => 'admin',
+                'username' => $admin['username']
+            ]);
             header("Location: ../views/admin/dashboard.php");
             exit;
         }
 
         echo "<script>alert('Invalid Username or Password. Try Again!');
               window.location.href = '../views/public/index.php';</script>";
+        app_log('Admin login failed - wrong password', [
+            'action' => 'login_failed',
+            'user_type' => 'admin',
+            'username' => $username,
+            'reason' => 'invalid_credentials'
+        ]);
         exit;
     } catch (Throwable $e) {
-        error_log('admin_login failed: ' . $e->getMessage());
+        app_log('Admin login error - system failure', [
+            'action' => 'login_error',
+            'user_type' => 'admin',
+            'username' => $username,
+            'error' => $e->getMessage()
+        ]);
         echo "<script>alert('An unexpected error occurred. Please try again.');
               window.location.href = '../views/public/index.php';</script>";
         exit;
@@ -61,16 +83,18 @@ if(isset($_POST['update_data']))
 
 
 
-function display_docs()
-{
-	global $con;
-	$query="select * from doctb";
-	$result=mysqli_query($con,$query);
-	while($row=mysqli_fetch_array($result))
+if (!function_exists('display_docs')) {
+	function display_docs()
 	{
-		$name=$row['name'];
-		# echo'<option value="" disabled selected>Select Doctor</option>';
-		echo '<option value="'.$name.'">'.$name.'</option>';
+		global $con;
+		$query="select * from doctb";
+		$result=mysqli_query($con,$query);
+		while($row=mysqli_fetch_array($result))
+		{
+			$name=$row['name'];
+			# echo'<option value="" disabled selected>Select Doctor</option>';
+			echo '<option value="'.$name.'">'.$name.'</option>';
+		}
 	}
 }
 

@@ -1,9 +1,14 @@
 <?php
+require_once __DIR__ . '/../config/logger.php';
+
+app_log_request('logout_doctor_hit');
 try {
     session_start();
+    $user = $_SESSION['dname'] ?? null;
     session_destroy();
+    app_log('doctor_logout', ['username' => $user]);
 } catch (Throwable $e) {
-    error_log('logout_doctor failed: ' . $e->getMessage());
+    app_log('logout_doctor_failed', ['error' => $e->getMessage()]);
     echo "<script>alert('An unexpected error occurred. Please try again.');
           window.location.href = '../views/public/index.php';</script>";
     exit;

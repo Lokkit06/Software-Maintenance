@@ -4,6 +4,8 @@
  */
 session_start();
 require_once __DIR__ . '/../config/db_connect.php';
+require_once __DIR__ . '/../config/logger.php';
+
 
 function respond_and_exit(string $message, string $redirect): void {
     echo "<script>alert('$message'); window.location.href = '$redirect';</script>";
@@ -11,10 +13,12 @@ function respond_and_exit(string $message, string $redirect): void {
 }
 
 if (!isset($_SESSION['pid'])) {
+    app_log('appointment_book_unauthorized', []);
     respond_and_exit('Not authorized', '../views/public/login.php');
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['app-submit'])) {
+    app_log('appointment_book_invalid_request', []);
     respond_and_exit('Invalid request', '../views/patient/dashboard.php');
 }
 
@@ -39,6 +43,7 @@ $apptime_ts = strtotime($apptime);
 // Validate future date/time
 if (!$appdate_ts || !$apptime_ts || date('Y-m-d', $appdate_ts) < $cur_date ||
     (date('Y-m-d', $appdate_ts) === $cur_date && date('H:i:s', $apptime_ts) <= $cur_time)) {
+    app_log('appointment_book_invalid_time', ['pid' => $pid, 'doctor' => $doctor, 'appdate' => $appdate, 'apptime' => $apptime]);
     respond_and_exit('Select a time or date in the future!', '../views/patient/dashboard.php#list-home');
 }
 
@@ -55,6 +60,7 @@ try {
     $check->close();
 
     if ($busy) {
+        app_log('appointment_book_busy', ['pid' => $pid, 'doctor' => $doctor, 'appdate' => $appdate, 'apptime' => $apptime]);
         respond_and_exit('Doctor not available at this time/date. Please choose a different slot.', '../views/patient/dashboard.php#list-home');
     }
 
@@ -81,12 +87,14 @@ try {
     $stmt->close();
 
     if ($ok) {
+        app_log('appointment_booked', ['pid' => $pid, 'doctor' => $doctor, 'appdate' => $appdate, 'apptime' => $apptime]);
         respond_and_exit('Your appointment successfully booked', '../views/patient/dashboard.php#list-home');
     }
 
+    app_log('appointment_book_failed_execute', ['pid' => $pid, 'doctor' => $doctor, 'appdate' => $appdate, 'apptime' => $apptime]);
     respond_and_exit('Unable to process your request. Please try again!', '../views/patient/dashboard.php#list-home');
 } catch (Throwable $e) {
-    error_log('book_appointment failed: ' . $e->getMessage());
+    app_log('book_appointment_failed', ['error' => $e->getMessage(), 'pid' => $pid, 'doctor' => $doctor, 'appdate' => $appdate ?? null, 'apptime' => $apptime ?? null]);
     respond_and_exit('An unexpected error occurred. Please try again.', '../views/patient/dashboard.php#list-home');
 }
 

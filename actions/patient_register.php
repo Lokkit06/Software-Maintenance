@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../config/db_connect.php';
+require_once __DIR__ . '/../config/logger.php';
 if(isset($_POST['patsub1'])){
 	$fname=$_POST['fname'];
   $lname=$_POST['lname'];
@@ -24,16 +25,35 @@ if(isset($_POST['patsub1'])){
         $_SESSION['gender'] = $_POST['gender'];
         $_SESSION['contact'] = $_POST['contact'];
         $_SESSION['email'] = $_POST['email'];
+        app_log('Patient registered successfully', [
+            'action' => 'registration_success',
+            'user_type' => 'patient',
+            'patient_id' => $_SESSION['pid'],
+            'email' => $_SESSION['email'],
+            'name' => $_SESSION['username']
+        ]);
         header("Location: ../views/patient/dashboard.php");
         exit;
     } catch (Throwable $e) {
-        error_log('patient_register failed: ' . $e->getMessage());
+        app_log('Patient registration error - system failure', [
+            'action' => 'registration_error',
+            'user_type' => 'patient',
+            'email' => $email ?? null,
+            'error' => $e->getMessage()
+        ]);
         echo "<script>alert('An unexpected error occurred. Please try again.');
               window.location.href = '../views/public/error_login.php';</script>";
         exit;
     }
   }
   else{
+    app_log('Patient registration failed - passwords do not match', [
+        'action' => 'registration_failed',
+        'user_type' => 'patient',
+        'email' => $email ?? null,
+        'contact' => $contact ?? null,
+        'reason' => 'password_mismatch'
+    ]);
     header("Location: ../views/public/error_login.php");
   }
 }
@@ -45,12 +65,13 @@ if(isset($_POST['update_data']))
         $query="update appointmenttb set payment='$status' where contact='$contact';";
         $result=mysqli_query($con,$query);
         if($result){
+            app_log('payment_status_updated', ['contact' => $contact, 'status' => $status]);
             header("Location:updated.php");
             exit;
         }
         throw new Exception('Failed to update payment status');
     } catch (Throwable $e) {
-        error_log('patient_register update_data failed: ' . $e->getMessage());
+        app_log('payment_status_update_failed', ['error' => $e->getMessage(), 'contact' => $contact ?? null]);
         echo "<script>alert('An unexpected error occurred. Please try again.');
               window.location.href = '../views/public/error_login.php';</script>";
         exit;
@@ -80,12 +101,13 @@ if(isset($_POST['doc_sub']))
         $query="insert into doctb(name)values('$name')";
         $result=mysqli_query($con,$query);
         if($result){
+            app_log('doctor_added_from_patient_register', ['name' => $name]);
             header("Location:adddoc.php");
             exit;
         }
         throw new Exception('Failed to add doctor');
     } catch (Throwable $e) {
-        error_log('patient_register doc_sub failed: ' . $e->getMessage());
+        app_log('patient_register_doc_add_failed', ['error' => $e->getMessage(), 'name' => $name ?? null]);
         echo "<script>alert('An unexpected error occurred. Please try again.');
               window.location.href = '../views/public/error_login.php';</script>";
         exit;

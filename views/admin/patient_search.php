@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <?php
 require_once '../../config/db_connect.php';
+require_once '../../config/logger.php';
 ?>
 <html>
 <head>
@@ -22,12 +23,14 @@ if(isset($_POST['patient_search_submit']))
     
     // Logic to handle no results found
     if(mysqli_num_rows($result) == 0){
+      app_log('patient_search_no_entries', ['contact' => $contact]);
       echo "<script> 
         alert('No entries found! Please enter valid details'); 
         window.location.href = 'dashboard.php#list-pat';
       </script>";
     }
     else {
+      app_log('patient_search_found', ['contact' => $contact]);
       echo "<div class='container-fluid' style='margin-top:50px;'>
       <div class='card'>
       <div class='card-body' style='background-color:#342ac1;color:#ffffff;'>

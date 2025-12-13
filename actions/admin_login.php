@@ -1,20 +1,52 @@
 <?php
 session_start();
 require_once __DIR__ . '/../config/db_connect.php';
-if(isset($_POST['adsub'])){
-	$username=$_POST['username1'];
-	$password=$_POST['password2'];
-	$query="select * from admintb where username='$username' and password='$password';";
-	$result=mysqli_query($con,$query);
-	if(mysqli_num_rows($result)==1)
-	{
-		$_SESSION['username']=$username;
-		header("Location: ../views/admin/dashboard.php");
-	}
-	else
-		// header("Location:error2.php");
-		echo("<script>alert('Invalid Username or Password. Try Again!');
-          window.location.href = '../views/public/index.php';</script>");
+
+/**
+ * Authenticate an admin by username/password.
+ *
+ * @return array<string,mixed>|null
+ */
+function authenticate_admin(mysqli $con, string $username, string $password): ?array
+{
+    try {
+        $stmt = $con->prepare('SELECT * FROM admintb WHERE username = ? AND password = ? LIMIT 1');
+        if (!$stmt) {
+            throw new Exception('Failed to prepare admin lookup statement');
+        }
+        $stmt->bind_param('ss', $username, $password);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+        $stmt->close();
+        return $row ?: null;
+    } catch (Throwable $e) {
+        error_log('admin_login authenticate_admin failed: ' . $e->getMessage());
+        return null;
+    }
+}
+
+if (isset($_POST['adsub'])) {
+	$username = $_POST['username1'];
+	$password = $_POST['password2'];
+
+    try {
+        $admin = authenticate_admin($con, $username, $password);
+        if ($admin) {
+            $_SESSION['username'] = $admin['username'];
+            header("Location: ../views/admin/dashboard.php");
+            exit;
+        }
+
+        echo "<script>alert('Invalid Username or Password. Try Again!');
+              window.location.href = '../views/public/index.php';</script>";
+        exit;
+    } catch (Throwable $e) {
+        error_log('admin_login failed: ' . $e->getMessage());
+        echo "<script>alert('An unexpected error occurred. Please try again.');
+              window.location.href = '../views/public/index.php';</script>";
+        exit;
+    }
 }
 if(isset($_POST['update_data']))
 {
@@ -50,3 +82,4 @@ if(isset($_POST['doc_sub']))
 	if($result)
 		header("Location:adddoc.php");
 }
+?>

@@ -15,21 +15,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['docsub1'])) {
         respond_and_exit('Email is required', '../views/admin/dashboard.php#list-settings1');
     }
 
-    $stmt = $con->prepare('DELETE FROM doctb WHERE email = ?');
-    if (!$stmt) {
-        respond_and_exit('Failed to prepare delete', '../views/admin/dashboard.php#list-settings1');
+    try {
+        $stmt = $con->prepare('DELETE FROM doctb WHERE email = ?');
+        if (!$stmt) {
+            throw new Exception('Failed to prepare delete');
+        }
+
+        $stmt->bind_param('s', $email);
+        $ok = $stmt->execute();
+        $stmt->close();
+
+        if ($ok && $con->affected_rows > 0) {
+            respond_and_exit('Doctor deleted', '../views/admin/dashboard.php#list-settings1');
+        }
+
+        respond_and_exit('No doctor found for that email', '../views/admin/dashboard.php#list-settings1');
+    } catch (Throwable $e) {
+        error_log('delete_doctor failed: ' . $e->getMessage());
+        respond_and_exit('An unexpected error occurred', '../views/admin/dashboard.php#list-settings1');
     }
-
-    $stmt->bind_param('s', $email);
-    $ok = $stmt->execute();
-    $stmt->close();
-
-    if ($ok && $con->affected_rows > 0) {
-        respond_and_exit('Doctor deleted', '../views/admin/dashboard.php#list-settings1');
-    }
-
-    respond_and_exit('No doctor found for that email', '../views/admin/dashboard.php#list-settings1');
 }
 
 respond_and_exit('Invalid request', '../views/admin/dashboard.php');
 
+?>

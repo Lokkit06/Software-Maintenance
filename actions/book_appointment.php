@@ -43,45 +43,51 @@ if (!$appdate_ts || !$apptime_ts || date('Y-m-d', $appdate_ts) < $cur_date ||
 }
 
 // Check doctor availability
-$check = $con->prepare('SELECT 1 FROM appointmenttb WHERE doctor = ? AND appdate = ? AND apptime = ? LIMIT 1');
-if (!$check) {
-    respond_and_exit('Failed to prepare availability check', '../views/patient/dashboard.php#list-home');
+try {
+    $check = $con->prepare('SELECT 1 FROM appointmenttb WHERE doctor = ? AND appdate = ? AND apptime = ? LIMIT 1');
+    if (!$check) {
+        throw new Exception('Failed to prepare availability check');
+    }
+    $check->bind_param('sss', $doctor, $appdate, $apptime);
+    $check->execute();
+    $checkResult = $check->get_result();
+    $busy = $checkResult && $checkResult->num_rows > 0;
+    $check->close();
+
+    if ($busy) {
+        respond_and_exit('Doctor not available at this time/date. Please choose a different slot.', '../views/patient/dashboard.php#list-home');
+    }
+
+    // Insert appointment
+    $stmt = $con->prepare('INSERT INTO appointmenttb (pid,fname,lname,gender,email,contact,doctor,docFees,appdate,apptime,userStatus,doctorStatus)
+                           VALUES (?,?,?,?,?,?,?,?,?,?,1,1)');
+    if (!$stmt) {
+        throw new Exception('Failed to prepare booking');
+    }
+    $stmt->bind_param(
+        'isssssssss',
+        $pid,
+        $fname,
+        $lname,
+        $gender,
+        $email,
+        $contact,
+        $doctor,
+        $docFees,
+        $appdate,
+        $apptime
+    );
+    $ok = $stmt->execute();
+    $stmt->close();
+
+    if ($ok) {
+        respond_and_exit('Your appointment successfully booked', '../views/patient/dashboard.php#list-home');
+    }
+
+    respond_and_exit('Unable to process your request. Please try again!', '../views/patient/dashboard.php#list-home');
+} catch (Throwable $e) {
+    error_log('book_appointment failed: ' . $e->getMessage());
+    respond_and_exit('An unexpected error occurred. Please try again.', '../views/patient/dashboard.php#list-home');
 }
-$check->bind_param('sss', $doctor, $appdate, $apptime);
-$check->execute();
-$checkResult = $check->get_result();
-$busy = $checkResult && $checkResult->num_rows > 0;
-$check->close();
 
-if ($busy) {
-    respond_and_exit('Doctor not available at this time/date. Please choose a different slot.', '../views/patient/dashboard.php#list-home');
-}
-
-// Insert appointment
-$stmt = $con->prepare('INSERT INTO appointmenttb (pid,fname,lname,gender,email,contact,doctor,docFees,appdate,apptime,userStatus,doctorStatus)
-                       VALUES (?,?,?,?,?,?,?,?,?,?,1,1)');
-if (!$stmt) {
-    respond_and_exit('Failed to prepare booking', '../views/patient/dashboard.php#list-home');
-}
-$stmt->bind_param(
-    'isssssssss',
-    $pid,
-    $fname,
-    $lname,
-    $gender,
-    $email,
-    $contact,
-    $doctor,
-    $docFees,
-    $appdate,
-    $apptime
-);
-$ok = $stmt->execute();
-$stmt->close();
-
-if ($ok) {
-    respond_and_exit('Your appointment successfully booked', '../views/patient/dashboard.php#list-home');
-}
-
-respond_and_exit('Unable to process your request. Please try again!', '../views/patient/dashboard.php#list-home');
-
+?>

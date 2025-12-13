@@ -1,25 +1,40 @@
 <?php
 session_start();
 require_once __DIR__ . '/../config/db_connect.php';
-if(isset($_POST['docsub1'])){
-	$dname=$_POST['username3'];
-	$dpass=$_POST['password3'];
-	$query="select * from doctb where username='$dname' and password='$dpass';";
-	$result=mysqli_query($con,$query);
-	if(mysqli_num_rows($result)==1)
-	{
-    while($row=mysqli_fetch_array($result,MYSQLI_ASSOC)){
-    
-		      $_SESSION['dname']=$row['username'];
-      
+
+/**
+ * Authenticate a doctor by username/password.
+ *
+ * @return array<string,mixed>|null
+ */
+function authenticate_doctor(mysqli $con, string $username, string $password): ?array
+{
+    $stmt = $con->prepare('SELECT * FROM doctb WHERE username = ? AND password = ? LIMIT 1');
+    if (!$stmt) {
+        return null;
     }
-		header("Location: ../views/doctor/dashboard.php");
-	}
-	else{
-    // header("Location:error2.php");
-    echo("<script>alert('Invalid Username or Password. Try Again!');
-          window.location.href = '../views/public/index.php';</script>");
-  }
+    $stmt->bind_param('ss', $username, $password);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result ? $result->fetch_assoc() : null;
+    $stmt->close();
+    return $row ?: null;
+}
+
+if (isset($_POST['docsub1'])) {
+    $dname = $_POST['username3'];
+    $dpass = $_POST['password3'];
+
+    $doctor = authenticate_doctor($con, $dname, $dpass);
+    if ($doctor) {
+        $_SESSION['dname'] = $doctor['username'];
+        header("Location: ../views/doctor/dashboard.php");
+        exit;
+    }
+
+    echo "<script>alert('Invalid Username or Password. Try Again!');
+          window.location.href = '../views/public/index.php';</script>";
+    exit;
 }
 
 

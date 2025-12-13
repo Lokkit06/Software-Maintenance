@@ -122,7 +122,7 @@ footer .widget h5 {
             <li class="active" style="margin-right: 40px;font-family: 'IBM Plex Sans', sans-serif;"><a href="index.php" style="color: white">HOME</a></li>
             <li class="active" style="margin-right: 40px;font-family: 'IBM Plex Sans', sans-serif;"><a href="services.php" style="color: white">ABOUT US</a></li>
             <li><a href="contact.php" style="margin-right: 40px;font-family: 'IBM Plex Sans', sans-serif;color: white">CONTACT</a></li>
-              </ul>
+          </ul>
         </div>
   
       </div>

@@ -3,7 +3,9 @@ require_once __DIR__ . '/../config/logger.php';
 
 app_log_request('logout_doctor_hit');
 try {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
     $user = $_SESSION['dname'] ?? null;
     session_destroy();
     app_log('doctor_logout', ['username' => $user]);

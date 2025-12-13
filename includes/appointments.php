@@ -7,15 +7,20 @@
  * @return array<int,array<string,mixed>>
  */
 function fetch_all_appointments(mysqli $con): array {
-    $stmt = $con->prepare('SELECT * FROM appointmenttb');
-    if (!$stmt) {
+    try {
+        $stmt = $con->prepare('SELECT * FROM appointmenttb');
+        if (!$stmt) {
+            throw new Exception('Failed to prepare fetch_all_appointments');
+        }
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $rows = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+        return $rows;
+    } catch (Throwable $e) {
+        error_log('fetch_all_appointments failed: ' . $e->getMessage());
         return [];
     }
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $rows = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
-    $stmt->close();
-    return $rows;
 }
 
 /**
@@ -26,16 +31,21 @@ function fetch_all_appointments(mysqli $con): array {
  * @return array<int,array<string,mixed>>
  */
 function fetch_appointments_by_contact(mysqli $con, string $contact): array {
-    $stmt = $con->prepare('SELECT * FROM appointmenttb WHERE contact = ?');
-    if (!$stmt) {
+    try {
+        $stmt = $con->prepare('SELECT * FROM appointmenttb WHERE contact = ?');
+        if (!$stmt) {
+            throw new Exception('Failed to prepare fetch_appointments_by_contact');
+        }
+        $stmt->bind_param('s', $contact);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $rows = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+        return $rows;
+    } catch (Throwable $e) {
+        error_log('fetch_appointments_by_contact failed: ' . $e->getMessage());
         return [];
     }
-    $stmt->bind_param('s', $contact);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $rows = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
-    $stmt->close();
-    return $rows;
 }
 
 /**
@@ -46,16 +56,21 @@ function fetch_appointments_by_contact(mysqli $con, string $contact): array {
  * @return array<int,array<string,mixed>>
  */
 function fetch_appointments_by_pid(mysqli $con, int $pid): array {
-    $stmt = $con->prepare('SELECT ID, doctor, docFees, appdate, apptime, userStatus, doctorStatus FROM appointmenttb WHERE pid = ?');
-    if (!$stmt) {
+    try {
+        $stmt = $con->prepare('SELECT ID, doctor, docFees, appdate, apptime, userStatus, doctorStatus FROM appointmenttb WHERE pid = ?');
+        if (!$stmt) {
+            throw new Exception('Failed to prepare fetch_appointments_by_pid');
+        }
+        $stmt->bind_param('i', $pid);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $rows = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+        return $rows;
+    } catch (Throwable $e) {
+        error_log('fetch_appointments_by_pid failed: ' . $e->getMessage());
         return [];
     }
-    $stmt->bind_param('i', $pid);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $rows = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
-    $stmt->close();
-    return $rows;
 }
 
 /**

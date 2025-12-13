@@ -9,32 +9,44 @@ require_once __DIR__ . '/../config/db_connect.php';
  */
 function authenticate_doctor(mysqli $con, string $username, string $password): ?array
 {
-    $stmt = $con->prepare('SELECT * FROM doctb WHERE username = ? AND password = ? LIMIT 1');
-    if (!$stmt) {
+    try {
+        $stmt = $con->prepare('SELECT * FROM doctb WHERE username = ? AND password = ? LIMIT 1');
+        if (!$stmt) {
+            throw new Exception('Failed to prepare doctor lookup statement');
+        }
+        $stmt->bind_param('ss', $username, $password);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result ? $result->fetch_assoc() : null;
+        $stmt->close();
+        return $row ?: null;
+    } catch (Throwable $e) {
+        error_log('doctor_login authenticate_doctor failed: ' . $e->getMessage());
         return null;
     }
-    $stmt->bind_param('ss', $username, $password);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result ? $result->fetch_assoc() : null;
-    $stmt->close();
-    return $row ?: null;
 }
 
 if (isset($_POST['docsub1'])) {
     $dname = $_POST['username3'];
     $dpass = $_POST['password3'];
 
-    $doctor = authenticate_doctor($con, $dname, $dpass);
-    if ($doctor) {
-        $_SESSION['dname'] = $doctor['username'];
-        header("Location: ../views/doctor/dashboard.php");
+    try {
+        $doctor = authenticate_doctor($con, $dname, $dpass);
+        if ($doctor) {
+            $_SESSION['dname'] = $doctor['username'];
+            header("Location: ../views/doctor/dashboard.php");
+            exit;
+        }
+
+        echo "<script>alert('Invalid Username or Password. Try Again!');
+              window.location.href = '../views/public/index.php';</script>";
+        exit;
+    } catch (Throwable $e) {
+        error_log('doctor_login failed: ' . $e->getMessage());
+        echo "<script>alert('An unexpected error occurred. Please try again.');
+              window.location.href = '../views/public/index.php';</script>";
         exit;
     }
-
-    echo "<script>alert('Invalid Username or Password. Try Again!');
-          window.location.href = '../views/public/index.php';</script>";
-    exit;
 }
 
 

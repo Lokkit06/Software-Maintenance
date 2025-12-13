@@ -11,20 +11,25 @@
  * @return array<int,array<string,mixed>>
  */
 function fetch_doctor_appointments(mysqli $con, string $doctorUsername): array {
-    $stmt = $con->prepare(
-        'SELECT pid, ID, fname, lname, gender, email, contact, appdate, apptime, userStatus, doctorStatus
-         FROM appointmenttb
-         WHERE doctor = ?'
-    );
-    if (!$stmt) {
+    try {
+        $stmt = $con->prepare(
+            'SELECT pid, ID, fname, lname, gender, email, contact, appdate, apptime, userStatus, doctorStatus
+             FROM appointmenttb
+             WHERE doctor = ?'
+        );
+        if (!$stmt) {
+            throw new Exception('Failed to prepare fetch_doctor_appointments');
+        }
+        $stmt->bind_param('s', $doctorUsername);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $rows = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+        $stmt->close();
+        return $rows;
+    } catch (Throwable $e) {
+        error_log('fetch_doctor_appointments failed: ' . $e->getMessage());
         return [];
     }
-    $stmt->bind_param('s', $doctorUsername);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $rows = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
-    $stmt->close();
-    return $rows;
 }
 
 function format_doctor_app_status(array $row): string {

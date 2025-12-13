@@ -10,9 +10,12 @@ if(isset($_POST['patsub1'])){
 	$password=$_POST['password'];
   $cpassword=$_POST['cpassword'];
   if($password==$cpassword){
-  	$query="insert into patreg(fname,lname,gender,email,contact,password,cpassword) values ('$fname','$lname','$gender','$email','$contact','$password','$cpassword');";
-    $result=mysqli_query($con,$query);
-    if($result){
+    try {
+        $query="insert into patreg(fname,lname,gender,email,contact,password,cpassword) values ('$fname','$lname','$gender','$email','$contact','$password','$cpassword');";
+        $result=mysqli_query($con,$query);
+        if(!$result){
+            throw new Exception('Failed to register patient');
+        }
         // Capture the newly created patient id for immediate use
         $_SESSION['pid'] = mysqli_insert_id($con);
         $_SESSION['username'] = $_POST['fname']." ".$_POST['lname'];
@@ -22,8 +25,13 @@ if(isset($_POST['patsub1'])){
         $_SESSION['contact'] = $_POST['contact'];
         $_SESSION['email'] = $_POST['email'];
         header("Location: ../views/patient/dashboard.php");
-    } 
-
+        exit;
+    } catch (Throwable $e) {
+        error_log('patient_register failed: ' . $e->getMessage());
+        echo "<script>alert('An unexpected error occurred. Please try again.');
+              window.location.href = '../views/public/error_login.php';</script>";
+        exit;
+    }
   }
   else{
     header("Location: ../views/public/error_login.php");
@@ -33,10 +41,20 @@ if(isset($_POST['update_data']))
 {
 	$contact=$_POST['contact'];
 	$status=$_POST['status'];
-	$query="update appointmenttb set payment='$status' where contact='$contact';";
-	$result=mysqli_query($con,$query);
-	if($result)
-		header("Location:updated.php");
+    try {
+        $query="update appointmenttb set payment='$status' where contact='$contact';";
+        $result=mysqli_query($con,$query);
+        if($result){
+            header("Location:updated.php");
+            exit;
+        }
+        throw new Exception('Failed to update payment status');
+    } catch (Throwable $e) {
+        error_log('patient_register update_data failed: ' . $e->getMessage());
+        echo "<script>alert('An unexpected error occurred. Please try again.');
+              window.location.href = '../views/public/error_login.php';</script>";
+        exit;
+    }
 }
 
 
@@ -58,10 +76,20 @@ if(isset($_POST['update_data']))
 if(isset($_POST['doc_sub']))
 {
 	$name=$_POST['name'];
-	$query="insert into doctb(name)values('$name')";
-	$result=mysqli_query($con,$query);
-	if($result)
-		header("Location:adddoc.php");
+    try {
+        $query="insert into doctb(name)values('$name')";
+        $result=mysqli_query($con,$query);
+        if($result){
+            header("Location:adddoc.php");
+            exit;
+        }
+        throw new Exception('Failed to add doctor');
+    } catch (Throwable $e) {
+        error_log('patient_register doc_sub failed: ' . $e->getMessage());
+        echo "<script>alert('An unexpected error occurred. Please try again.');
+              window.location.href = '../views/public/error_login.php';</script>";
+        exit;
+    }
 }
 function display_admin_panel(){
 	echo '<!DOCTYPE html>

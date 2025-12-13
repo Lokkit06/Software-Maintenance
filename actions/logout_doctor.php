@@ -1,6 +1,13 @@
 <?php
-session_start();
-session_destroy();
+try {
+    session_start();
+    session_destroy();
+} catch (Throwable $e) {
+    error_log('logout_doctor failed: ' . $e->getMessage());
+    echo "<script>alert('An unexpected error occurred. Please try again.');
+          window.location.href = '../views/public/index.php';</script>";
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

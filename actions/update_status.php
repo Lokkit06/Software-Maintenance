@@ -19,10 +19,20 @@ if(isset($_POST['update_data']))
 {
  $contact=$_POST['contact'];
  $status=$_POST['status'];
- $query="update appointmenttb set payment='$status' where contact='$contact';";
- $result=mysqli_query($con,$query);
- if($result)
-  header("Location:updated.php");
+  try {
+    $query="update appointmenttb set payment='$status' where contact='$contact';";
+    $result=mysqli_query($con,$query);
+    if($result) {
+      header("Location:updated.php");
+      exit;
+    }
+    throw new Exception('Failed to update payment status');
+  } catch (Throwable $e) {
+    error_log('update_status update_data failed: ' . $e->getMessage());
+    echo "<script>alert('An unexpected error occurred. Please try again.');
+          window.location.href = '../views/public/error_login.php';</script>";
+    exit;
+  }
 }
 
 // function display_docs()
@@ -80,10 +90,20 @@ function display_docs()
 if(isset($_POST['doc_sub']))
 {
  $username=$_POST['username'];
- $query="insert into doctb(username)values('$username')";
- $result=mysqli_query($con,$query);
- if($result)
-  header("Location:adddoc.php");
+  try {
+    $query="insert into doctb(username)values('$username')";
+    $result=mysqli_query($con,$query);
+    if($result) {
+      header("Location:adddoc.php");
+      exit;
+    }
+    throw new Exception('Failed to add doctor');
+  } catch (Throwable $e) {
+    error_log('update_status doc_sub failed: ' . $e->getMessage());
+    echo "<script>alert('An unexpected error occurred. Please try again.');
+          window.location.href = '../views/public/error_login.php';</script>";
+    exit;
+  }
 }
 
 ?>

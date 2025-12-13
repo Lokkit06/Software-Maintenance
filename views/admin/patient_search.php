@@ -12,49 +12,58 @@ require_once '../../config/db_connect.php';
 <?php
 if(isset($_POST['patient_search_submit']))
 {
-  $contact = $_POST['patient_contact'];
-  $query = "select * from patreg where contact= '$contact'";
-  $result = mysqli_query($con, $query);
-  
-  // Logic to handle no results found
-  if(mysqli_num_rows($result) == 0){
-    echo "<script> 
-      alert('No entries found! Please enter valid details'); 
-      window.location.href = 'dashboard.php#list-pat';
-    </script>";
-  }
-  else {
-    echo "<div class='container-fluid' style='margin-top:50px;'>
-    <div class='card'>
-    <div class='card-body' style='background-color:#342ac1;color:#ffffff;'>
-      <table class='table table-hover'>
-        <thead>
-          <tr>
-            <th scope='col'>First Name</th>
-            <th scope='col'>Last Name</th>
-            <th scope='col'>Email</th>
-            <th scope='col'>Contact</th>
-            <th scope='col'>Password</th>
-          </tr>
-        </thead>
-        <tbody>";
-
-    while ($row = mysqli_fetch_array($result)){
-      $fname = $row['fname'];
-      $lname = $row['lname'];
-      $email = $row['email'];
-      $contact = $row['contact'];
-      $password = $row['password'];
-      echo "<tr>
-        <td>$fname</td>
-        <td>$lname</td>
-        <td>$email</td>
-        <td>$contact</td>
-        <td>$password</td>
-      </tr>";
+  try {
+    $contact = $_POST['patient_contact'];
+    $query = "select * from patreg where contact= '$contact'";
+    $result = mysqli_query($con, $query);
+    if(!$result){
+      throw new Exception('Patient search query failed');
     }
     
-    echo "</tbody></table><center><a href='dashboard.php#list-pat' class='btn btn-light'>Back to Dashboard</a></div></center></div></div></div>";
+    // Logic to handle no results found
+    if(mysqli_num_rows($result) == 0){
+      echo "<script> 
+        alert('No entries found! Please enter valid details'); 
+        window.location.href = 'dashboard.php#list-pat';
+      </script>";
+    }
+    else {
+      echo "<div class='container-fluid' style='margin-top:50px;'>
+      <div class='card'>
+      <div class='card-body' style='background-color:#342ac1;color:#ffffff;'>
+        <table class='table table-hover'>
+          <thead>
+            <tr>
+              <th scope='col'>First Name</th>
+              <th scope='col'>Last Name</th>
+              <th scope='col'>Email</th>
+              <th scope='col'>Contact</th>
+              <th scope='col'>Password</th>
+            </tr>
+          </thead>
+          <tbody>";
+
+      while ($row = mysqli_fetch_array($result)){
+        $fname = $row['fname'];
+        $lname = $row['lname'];
+        $email = $row['email'];
+        $contact = $row['contact'];
+        $password = $row['password'];
+        echo "<tr>
+          <td>$fname</td>
+          <td>$lname</td>
+          <td>$email</td>
+          <td>$contact</td>
+          <td>$password</td>
+        </tr>";
+      }
+      
+      echo "</tbody></table><center><a href='dashboard.php#list-pat' class='btn btn-light'>Back to Dashboard</a></div></center></div></div></div>";
+    }
+  } catch (Throwable $e) {
+    error_log('patient_search failed: ' . $e->getMessage());
+    echo "<script>alert('An unexpected error occurred. Please try again.');
+          window.location.href = 'dashboard.php#list-pat';</script>";
   }
 }
 ?>

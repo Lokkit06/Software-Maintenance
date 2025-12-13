@@ -30,14 +30,20 @@ if(isset($_POST['prescribe']) && isset($_POST['pid']) && isset($_POST['ID']) && 
   $ID = $_POST['ID'];
   $prescription = $_POST['prescription'];
   
-  $query=mysqli_query($con,"insert into prestb(doctor,pid,ID,fname,lname,appdate,apptime,disease,allergy,prescription) values ('$doctor','$pid','$ID','$fname','$lname','$appdate','$apptime','$disease','$allergy','$prescription')");
-    if($query)
-    {
-      echo "<script>alert('Prescribed successfully!');</script>";
-    }
-    else{
-      echo "<script>alert('Unable to process your request. Try again!');</script>";
-    }
+  try {
+    $query=mysqli_query($con,"insert into prestb(doctor,pid,ID,fname,lname,appdate,apptime,disease,allergy,prescription) values ('$doctor','$pid','$ID','$fname','$lname','$appdate','$apptime','$disease','$allergy','$prescription')");
+      if($query)
+      {
+        echo "<script>alert('Prescribed successfully!');</script>";
+      }
+      else{
+        throw new Exception('Failed to save prescription');
+      }
+  } catch (Throwable $e) {
+    error_log('prescribe failed: ' . $e->getMessage());
+    echo "<script>alert('An unexpected error occurred. Please try again.');</script>";
+    exit;
+  }
   // else{
   //   echo "<script>alert('GET is not working!');</script>";
   // }initial
